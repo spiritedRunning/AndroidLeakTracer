@@ -5,19 +5,19 @@
 #include "Object.h"
 #include <fstream>
 #include <unwind.h>
+#include <unistd.h>
+#include "Log.h"
 
 
 /** starts monitoring memory allocations in all threads */
-void leaktracer_startMonitoringAllThreads(
-        JNIEnv *env,
-        jclass) {
+void leaktracer_startMonitoringAllThreads(JNIEnv *env, jclass) {
+    LOGE("startMonitoringAllThreads");
     leaktracer::MemoryTrace::GetInstance().startMonitoringAllThreads();
 }
 
 /** starts monitoring memory allocations in current thread */
-void leaktracer_startMonitoringThisThread(
-        JNIEnv *env,
-        jclass) {
+void leaktracer_startMonitoringThisThread(JNIEnv *env, jclass) {
+    LOGE("startMonitoringThisThread");
     leaktracer::MemoryTrace::GetInstance().startMonitoringThisThread();
 }
 
@@ -25,34 +25,31 @@ void leaktracer_startMonitoringThisThread(
  *   this thread only, depends on the function used to start
  *   monitoring
  */
-void leaktracer_stopMonitoringAllocations(
-        JNIEnv *env,
-        jclass) {
+void leaktracer_stopMonitoringAllocations(JNIEnv *env, jclass) {
+    LOGE("stopMonitoringAllocations");
     leaktracer::MemoryTrace::GetInstance().stopMonitoringAllocations();
 }
 
 /** stops all monitoring - both of allocations and releases */
-void leaktracer_stopAllMonitoring(
-        JNIEnv *env,
-        jclass) {
+void leaktracer_stopAllMonitoring(JNIEnv *env, jclass) {
+    LOGE("stopAllMonitoring");
     leaktracer::MemoryTrace::GetInstance().stopAllMonitoring();
 }
 
 /** writes report with all memory leaks */
-void leaktracer_writeLeaksToFile(
-        JNIEnv *env,
-        jclass,
-        jstring filePath
+void leaktracer_writeLeaksToFile(JNIEnv *env, jclass, jstring filePath
 ) {
+    sleep(3);
+
     const char *path = env->GetStringUTFChars(filePath, JNI_FALSE);
-    leaktracer::MemoryTrace::GetInstance().writeLeaksToFile(path);
+    leaktracer::MemoryTrace::GetInstance().writeLeaksToFile(path);  // Android 11上测试， target不能用29
     env->ReleaseStringUTFChars(filePath, path);
+
 }
 
 /**  手动触发内存泄漏 **/
-void performLeak(
-        JNIEnv *env,
-        jobject /* this */) {
+void performLeak(JNIEnv *env, jclass /* this */) {
+    LOGE("performLeak");
     // 申请内存但是不释放
     void *leakedMallocMem = malloc(100);
     // 申请内存并释放
@@ -64,6 +61,8 @@ void performLeak(
     // 创建对象并释放
     Object *safeObject = new Object();
     delete (safeObject);
+
+    LOGE("performLeak end");
 }
 
 int JNI_OnLoad(JavaVM *javaVM, void *reserved) {

@@ -1,8 +1,11 @@
 package com.wsy.androidleaktracer;
 
+import android.util.Log;
+
 import java.io.File;
 
 public class NativeMemoryLeakDetector {
+    private static final String TAG = "NativeMemoryLeakDetecto";
 
     static {
         System.loadLibrary("leaktracer");
@@ -45,6 +48,7 @@ public class NativeMemoryLeakDetector {
      * writes report with all memory leaks
      */
     public static void writeLeaksResultToFile(String filePath) {
+        Log.e(TAG, "writeLeaksResultToFile: " + filePath);
         if (filePath == null) {
             throw new NullPointerException("filePath is null");
         }
